@@ -306,10 +306,15 @@ if (!empty($result['blacklist'])) {
     }
 }
 
+$message = null;
 if (!empty($notifications)) {
-    echo implode("\n", $notifications);
+    $message = implode("\n", $notifications). "\n";
+    $message = $message . $result['messages'];
+}
 
-    echo "\n";
-    echo $result['messages'];
+if (isset($argv[2]) && filter_var($argv[2], FILTER_VALIDATE_EMAIL)) {
+    mail($argv[2], 'MX Monitor ' . $argv[1], $message);
+} else {
+    echo $message;
 }
 ?>
