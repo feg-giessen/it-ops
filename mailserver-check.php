@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Class EmailCheck
+ * based on https://github.com/burningsoul/MX-Email-Check
+ */
 class EmailCheck {
 
     private $sock;
@@ -99,11 +103,11 @@ class EmailCheck {
         'zombie.dnsbl.sorbs.net'
     );
 
-    function logmsg($str) {
+    private function logmsg($str) {
         $this->messages = $this->messages . $str . "\n";
     }
 
-    function send($msg) {
+    private function send($msg) {
         fwrite($this->sock, $msg . "\r\n");
 
         $reply = fread($this->sock, 2082);
@@ -119,7 +123,7 @@ class EmailCheck {
      * @param $domain
      * @return array
      */
-    function queryMX($domain) {
+    private function queryMX($domain) {
         $hosts = array();
         $preferences = array();
 
@@ -133,14 +137,14 @@ class EmailCheck {
      *
      * @param $email
      */
-    function setDomainData($email) {
+    private function setDomainData($email) {
         $parts = explode('@', $email);
 
         $this->domain = array_pop($parts);
         $this->user = implode('@', $parts);
     }
 
-    function parseRcptReply($reply) {
+    private function parseRcptReply($reply) {
         $matches = array();
 
         preg_match('/^([0-9]{3}) /ims', $reply, $matches);
@@ -149,7 +153,7 @@ class EmailCheck {
         return ($code == '250' || $code == '451' || $code == '452');
     }
 
-    function checkBlacklist($mxHost) {
+    private function checkBlacklist($mxHost) {
         $ip = gethostbyname ($mxHost);
         $ip_revers = join('.', array_reverse(explode('.', $ip)));
 
@@ -169,9 +173,9 @@ class EmailCheck {
 
     /**
      * Validate the email id
-     * @return the info
+     * @return array the info
      */
-    function validate($email) {
+    public function validate($email) {
 
         $result = array();
 
