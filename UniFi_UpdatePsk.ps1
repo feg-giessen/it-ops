@@ -13,8 +13,8 @@ $psk = "Your new PSK"
 
 $mySession = $null
 
-$param = "login=Login&username=$username&password=$password"
-$url = "$site/login"
+$param = "{'username':'${username}','password':'${password}'}"
+$url = "$site/api/login"
 Invoke-RestMethod -SessionVariable mySession -Uri $url -Method Post -Body $param | out-null
 
 $param = "json={}"
