@@ -13,13 +13,12 @@ $psk = "Your new PSK"
 
 $mySession = $null
 
-$param = "{'username':'${username}','password':'${password}'}"
+$param = '{"username":"' + ${username} + '","password":"' + ${password} + '","remember":false,"strict":true}'
 $url = "$site/api/login"
 Invoke-RestMethod -SessionVariable mySession -Uri $url -Method Post -Body $param | out-null
 
-$param = "json={}"
-$url = "$site/api/s/default/list/wlanconf"
-$wlanList = Invoke-RestMethod -WebSession $mySession -Uri $url -Method Post -Body $param
+$url = "$site/api/s/default/rest/wlanconf"
+$wlanList = Invoke-RestMethod -WebSession $mySession -Uri $url -Method Get
 
 $wlanConfig = $wlanList.data | Where { $_.name -eq $wlanName }
 
@@ -28,12 +27,15 @@ if ($wlanConfig -eq $null) {
 }
 
 $wlanConfigId = $wlanConfig._id
-$wlanConfig.PSObject.Properties.Remove('_id')
 $wlanConfig.x_passphrase = $psk
 
-$url = "$site/api/s/default/upd/wlanconf/$wlanConfigId"
+$url = "$site/api/s/default/rest/wlanconf/$wlanConfigId"
 $wlanConfig | ConvertTo-Json -Compress -OutVariable jsonConfig | out-null
-$param = "json=$jsonConfig"
-$apiResult = Invoke-RestMethod -WebSession $mySession -Uri $url -Method Post -Body $param
+
+$headers = @{
+    'Content-Type' = 'application/json; charset=utf-8'
+    'X-Csrf-Token' = ($mySession.Cookies.GetCookies($site) | Where { $_.Name -eq 'csrf_token' }).Value
+}
+$apiResult = Invoke-RestMethod -WebSession $mySession -Uri $url -Method Put -Body $jsonConfig -Headers $headers
 
 $apiResult.meta.rc | Write-Host
