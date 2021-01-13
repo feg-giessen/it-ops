@@ -10,6 +10,7 @@ $psk = "Your new PSK"
 
 # Allow self signed certifiactes.
 [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 $mySession = $null
 
